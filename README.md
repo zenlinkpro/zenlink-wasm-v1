@@ -25,9 +25,12 @@ The factory contract can be used to create exchange contracts for any ERC20 toke
   Compile the contracts using docker.
 
     cd erc20
-    sudo docker run --rm -v "$PWD":/build -w /build zenlink_contract_builder cargo +nightly-2020-10-06-x86_64-unknown-linux-gnu contract build
-    sudo docker run --rm -v "$PWD":/build -w /build zenlink_contract_builder cargo +nightly-2020-10-06-x86_64-unknown-linux-gnu contract generate-metadata
+    sudo docker run --rm -v "$PWD":/build -w /build zenlinkpro/dex:zenlink_contract_builder cargo +nightly-2020-10-06-x86_64-unknown-linux-gnu contract build
+    sudo docker run --rm -v "$PWD":/build -w /build zenlinkpro/dex:zenlink_contract_builder cargo +nightly-2020-10-06-x86_64-unknown-linux-gnu contract generate-metadata
   Then we can find the erc20.wasm and metadata.json in the target folder. 
+    Because the factory project depend on the exchange project. So we must run the command in factroy project parent folder.
+    
+    sudo docker run --rm -v "$PWD":/build -w /build/factory zenlinkpro/dex:zenlink_contract_builder cargo +nightly-2020-10-06-x86_64-unknown-linux-gnu contract build
 
 ### Build test environment manually
 
@@ -57,6 +60,17 @@ cargo +nightly-<yyyy-MM-dd>-x86_64-unknown-linux-gnu contract generate-metadata
 ```
 We will see *.wasm and metadata.json in the folder named target.
 
+## Unit test
+  We can run unit test in exchange project. 
+
+  Docker
+
+    cd exchange
+    sudo docker run --rm -v "$PWD":/build -w /build zenlinkpro/dex:zenlink_contract_builder cargo test
+  Manually
+
+    cd exchange
+    cargo test
 ## Test
 
 * **connect the canvas node with web.**

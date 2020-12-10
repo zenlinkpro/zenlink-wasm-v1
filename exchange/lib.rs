@@ -93,7 +93,7 @@ mod exchange {
         //total liquidity
         pub total_supply : Balance,
 
-        balances : StorageHashMap<AccountId, Balance>, 
+        pub balances : StorageHashMap<AccountId, Balance>, 
         allowances: StorageHashMap<(AccountId, AccountId), Balance>,
         //address of the ERC20 token traded on this contract
         pub token : AccountId,
@@ -132,7 +132,9 @@ mod exchange {
             };
 
             //The contract deployer show transfer some token to this contract. if success, the contract deployer become first liquidity provider.
-            instance.token_transfer_from(deployer, instance.exchange_account_id, token_ammount);
+            if token_ammount > 0{
+                instance.token_transfer_from(deployer, instance.exchange_account_id, token_ammount);
+            }
             instance.balances.insert(deployer, instance.total_supply);
 
             instance
@@ -258,7 +260,7 @@ mod exchange {
             (dot_ammount, token_ammount)
         }   
 
-        fn input_price(&self, input_amount : Balance, input_reserve : Balance, output_reserve : Balance) -> Balance{
+        pub fn input_price(&self, input_amount : Balance, input_reserve : Balance, output_reserve : Balance) -> Balance{
             assert!(input_reserve > 0 && output_reserve > 0);
             let input_ammount_with_fee = input_amount * 997u128;
             let numerator = input_ammount_with_fee * output_reserve;
@@ -266,7 +268,7 @@ mod exchange {
             numerator / denominator
         }
 
-        fn output_price(&self, output_ammount: Balance, input_reserve : Balance, output_reserve : Balance) -> Balance{
+        pub fn output_price(&self, output_ammount: Balance, input_reserve : Balance, output_reserve : Balance) -> Balance{
             assert!(input_reserve > 0 && output_reserve > 0);
             let numerator = input_reserve * output_ammount * 1000u128;
             let denomiator = (output_reserve - output_ammount) *997u128;
@@ -923,5 +925,89 @@ mod exchange {
         pub fn get_address(&self) ->AccountId{
             self.exchange_account_id
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ink_env::{
+        AccountId,
+    };
+    use ink_lang as ink;
+
+    #[ink::test]
+    fn test_transfer_liquidity_should_work(){
+        let token_account_id = AccountId::from([0x01; 32]);
+        let factory_account_id = AccountId::from([0x02; 32]);
+        let accounts = ink_env::test::default_accounts::<ink_env::DefaultEnvironment>().unwrap();
+        let liquidity_amount = 50000u128;
+
+        let mut contract = Exchange::new(token_account_id, factory_account_id, accounts.alice, 0u128);
+        contract.balances.insert(accounts.alice, liquidity_amount);
+
+        assert_eq!(contract.balance_of(accounts.alice), liquidity_amount);
+        assert!(contract.transfer(accounts.bob, 200));
+        assert_eq!(contract.balance_of(accounts.alice), liquidity_amount - 200);
+        assert_eq!(contract.balance_of(accounts.bob), 200);
+    }
+
+    #[ink::test]
+    fn test_transfer_from_liquidity_should_work(){
+        let token_account_id = AccountId::from([0x01; 32]);
+        let factory_account_id = AccountId::from([0x02; 32]);
+        let accounts = ink_env::test::default_accounts::<ink_env::DefaultEnvironment>().unwrap();
+        let mut contract = Exchange::new(token_account_id, factory_account_id, accounts.alice, 0u128);
+
+        let liquidity_amount = 50000u128;
+        contract.balances.insert(accounts.alice, liquidity_amount);
+
+        contract.approve(accounts.alice, 500);
+        assert!(contract.transfer_from(accounts.alice, accounts.bob, 200));
+        assert_eq!(contract.balance_of(accounts.bob), 200);
+    }
+
+    #[ink::test]
+    fn test_output_price(){
+        let token_account_id = AccountId::from([0x01; 32]);
+        let factory_account_id = AccountId::from([0x02; 32]);
+        let accounts = ink_env::test::default_accounts::<ink_env::DefaultEnvironment>().unwrap();
+        let contract = Exchange::new(token_account_id, factory_account_id, accounts.alice, 0u128);
+
+        let output_amount = 40;
+        let input_reserve = 200000;
+        let output_reserve = 200000;
+        let sell_amount = contract.output_price(output_amount, input_reserve, output_reserve);
+        println!("bought amount:{} sell amount:{}", output_amount, sell_amount);
+
+        let output_amount_2 = 40;
+        let input_reserve_2 = 200;
+        let output_reserve_2 = 200;
+        let sell_amount_2 = contract.output_price(output_amount_2, input_reserve_2, output_reserve_2);
+        println!("bought amount:{} sell amount:{}", output_amount_2, sell_amount_2);
+
+        assert!(sell_amount_2 > sell_amount);
+    }
+
+    #[ink::test]
+    fn test_input_price(){
+        let token_account_id = AccountId::from([0x01; 32]);
+        let factory_account_id = AccountId::from([0x02; 32]);
+        let accounts = ink_env::test::default_accounts::<ink_env::DefaultEnvironment>().unwrap();
+        let contract = Exchange::new(token_account_id, factory_account_id, accounts.alice, 0u128);
+
+        let intput_amount = 40;
+        let input_reserve = 200000;
+        let output_reserve = 200000;
+        let bought_amount = contract.input_price(intput_amount, input_reserve, output_reserve);
+        println!("sell amount:{} bought amount:{}", intput_amount, bought_amount);
+
+        let input_amount_2 = 40;
+        let input_reserve_2 = 200;
+        let output_reserve_2 = 200;
+        let bought_amount_2 = contract.input_price(input_amount_2, input_reserve_2, output_reserve_2);
+        println!("sell amount:{} bought amount:{}", input_amount_2, bought_amount_2);
+
+        assert!(bought_amount > bought_amount_2);
     }
 }
