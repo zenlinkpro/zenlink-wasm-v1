@@ -1,3 +1,5 @@
+**This repo is deprecated!**
+
 ## Contracts
 ### erc20
 
@@ -71,70 +73,3 @@ We will see *.wasm and metadata.json in the folder named target.
 
     cd exchange
     cargo test
-## Test
-
-* **connect the canvas node with web.**
-
-[https://paritytech.github.io/canvas-ui/#/upload](https://paritytech.github.io/canvas-ui/#/upload)
-
-* **upload contract**
-
-![图片](https://uploader.shimo.im/f/ZhbssN1w5IL9nRvo.png!thumbnail)
-
-When we upload all the three contract. We will deploy them. Click the "deploy" label. We can see the contracts on the chain.
-
-![图片](https://uploader.shimo.im/f/yuokMk6PVsQUKN5c.png!thumbnail)
-
-* **Deploy Erc20 contract**
-
-Click the "Deploy" label .
-
-![图片](https://uploader.shimo.im/f/y54Gb3DZMFdtVlIx.png!thumbnail)
-
-We can give this erc20 contract a name like "token_a". And we can deploy the second erc20 token named "token_b".
-
-* **Deploy factory contract**
-
-We deploy the factory contract just by click the "deploy" lable.
-
-* **Execute factory contract to creating trading pair**
-
-![图片](https://uploader.shimo.im/f/QvxksWguJTVkRryz.png!thumbnail)
-
-Call the **initialize_factory** interface. "exchangeTemplateAddress" represent the hash code of the exchange contract on the chain. We can copy it from the deploy panel.
-
-![图片](https://uploader.shimo.im/f/71Q0XxOZl8oM8hB8.png!thumbnail)
-
-Then we we can call the "create_exchange" interface.
-
-![图片](https://uploader.shimo.im/f/f4ZVkDys7OCXBIIt.png!thumbnail)
-
-In this picture, We create a token_A-Dot trading pair. Add we privide 10unit Dot and 10Uint token_a to the liquidity pool.
-
-After create the trading pair successfully. We Call the**get_exchange**interface to get the exchange contract accountId.
-
-![图片](https://uploader.shimo.im/f/ZiZo2m2esJp0OLq7.png!thumbnail)
-
-So the exchange pair has been instantiated. We can add it to web browser.
-
-![图片](https://uploader.shimo.im/f/QbHlpdpLJ8gwvSjD.png!thumbnail)
-
-* **Trade on token_a-Dot pair**
-
-We can invoke some transfer in this pair. Like add_liquidity/ remove_liquidity, dot-token_a swap and so on.
-
-![图片](https://uploader.shimo.im/f/cc5hQctxPXOAAQCb.png!thumbnail)
-
-* **Trade between on tokens.**
-
-Now, we deploy a erc20 named token_c. Then we can create the token_c-Dot trading pair. The steps are same as creating token_a.
-
-After that, we can trade between in tokens.
-
-![图片](https://uploader.shimo.im/f/t7RlwIQmauhehIHI.png!thumbnail)
-
-After trading between on tokens successfully, We can call the **balance_of**  interface of erc20 contract to check the balance of token which we get in this transaction。
-
-![图片](https://uploader.shimo.im/f/uKLuCZ1BugVKhVrI.png!thumbnail)
-
-Please attention to the "Call results" of "balance_of". It my be a hexadecimal number or just a bug. After copy it to a txt editor, It wll show nornally.
