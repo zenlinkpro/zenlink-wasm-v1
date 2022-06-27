@@ -1,4 +1,5 @@
 **This repo is deprecated!**
+**This repo was written with ink! pallet at first, then was rewritten in Gear.**
 
 ## Contracts
 ### erc20
